@@ -41,8 +41,12 @@ class Transmitter(Process):
                 return
             else:
                 self.transmit_buffer.append(item)
+                # Here we decided how many times to buffer before sending
+                # them via the sat modem
                 if len(self.transmit_buffer) > 3:
                     self.transmit(self.transmit_buffer)
                     continue
 
+                # How long should we wait before sending a smaller batch
+                # of times
                 signal.alarm(180)

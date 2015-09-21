@@ -15,7 +15,7 @@ class Receiver(Process):
         self.work_queue = work_queue
 
     def run(self):
-        for i in range(5):
+        while True:
             """
             Code to read a line from the clock serial and perhaps process
             it a bit (remove useless data, add an ID string or something)
@@ -23,4 +23,4 @@ class Receiver(Process):
             item_from_serial = None  # Dummy
             self.work_queue.put(item_from_serial)
 
-            time.sleep(30) #  Dummy delay
+            time.sleep(30)  # Dummy delay

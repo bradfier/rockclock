@@ -2,7 +2,6 @@
 
 from multiprocessing import Queue
 import signal
-import sys
 from transmitter import Transmitter
 from receiver import Receiver
 
@@ -28,4 +27,4 @@ if __name__ == '__main__':
 
     # Wait until transmitter terminates then kill receiver
     transmitter.join()
-    sys.exit(0)
+    receiver.terminate()

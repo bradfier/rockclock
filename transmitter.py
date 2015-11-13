@@ -1,11 +1,11 @@
-from multiprocessing import Process
+import threading
 import signal
 
 
-class Transmitter(Process):
+class Transmitter(threading.Thread):
 
     def __init__(self, work_queue):
-        Process.__init__(self)
+        threading.Thread.__init__(self)
 
         self.work_queue = work_queue
         self.transmit_buffer = list()

@@ -1,24 +1,28 @@
 #!/usr/bin/python3
 
-from multiprocessing import Queue
 import signal
+import queue
 from transmitter import Transmitter
 from receiver import Receiver
 
+import serial
 
-__queue = None
+
+_queue = None
 
 
 def term_handler(signum, frame):
-    __queue.put("SHUTDOWN")
+    _queue.put("SHUTDOWN")
 
 
 if __name__ == '__main__':
 
-    __queue = Queue()
+    _queue = queue.Queue()
 
-    transmitter = Transmitter(__queue)
-    receiver = Receiver(__queue)
+    clock_conn = serial.Serial("/dev/ttyUSB0", 9600, timeout=2)
+
+    transmitter = Transmitter(_queue)
+    receiver = Receiver(clock_conn, _queue)
 
     receiver.start()
     transmitter.start()
@@ -27,4 +31,4 @@ if __name__ == '__main__':
 
     # Wait until transmitter terminates then kill receiver
     transmitter.join()
-    receiver.terminate()
+    receiver.stop()

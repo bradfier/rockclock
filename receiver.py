@@ -11,7 +11,7 @@ class Receiver(threading.Thread):
         """
         threading.Thread.__init__(self)
         self.work_queue = work_queue
-        self._stop = threading.Event()
+        self._halt = threading.Event()
         self.conn = connection
 
     def run(self):
@@ -20,18 +20,15 @@ class Receiver(threading.Thread):
             Code to read a line from the clock serial and perhaps process
             it a bit (remove useless data, add an ID string or something)
             """
-            try:
-                item_from_serial = self.conn.readline().strip()
-                self.work_queue.put(item_from_serial)
+            item_from_serial = self.conn.readline().strip()
+            if item_from_serial:
+                self.work_queue.put(item_from_serial.decode())
 
-            except Exception:
-                if self.stopped():
-                    return
-                else:
-                    continue
+            if self.stopped():
+                return
 
     def stop(self):
-        self._stop.set()
+        self._halt.set()
 
     def stopped(self):
-        return self._stop.isSet()
+        return self._halt.is_set()

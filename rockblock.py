@@ -42,9 +42,8 @@ class RockBlockSignalException(Exception):
 
 class RockBlock(object):
 
-    def __init__(self, handle, retries=5, timeout=10):
+    def __init__(self, handle, timeout=10):
         self.handle = handle
-        self.retries = retries
         self.timeout = timeout
 
         try:
@@ -76,24 +75,16 @@ class RockBlock(object):
     @connected
     def send_message(self, msg):
 
-        for r in range(self.retries):
-            if self.get_signal_strength() < 2:
-                print("Waiting for signal.")
-                time.sleep(10)
-                continue
+        if self.get_signal_strength() < 2:
+            raise RockBlockSignalException()
 
-            if not self._queue_msg(msg):
-                raise RockBlockException()
+        if not self._queue_msg(msg):
+            raise RockBlockException("Error queueing message.")
 
-            if not self._initiate_session():
-                print("Transmission failure")
-                time.sleep(10)
-                continue
+        if not self._initiate_session():
+            raise RockBlockException("Error initiating session.")
 
-            return True
-
-        print("Retries exhausted")
-        return False
+        return True
 
     @connected
     def get_signal_strength(self):
@@ -102,8 +93,11 @@ class RockBlock(object):
         # Signal acquisition can take a _long_ time
         self.conn.timeout = 30
 
-        if self.conn.readline().strip() == b"AT+CSQ":
+        response = self.conn.readline().strip()
+        if response == b"AT+CSQ":
             response = self.conn.readline().strip()
+
+            # Set the timeout back to the original
             self.conn.timeout = self.timeout
 
             if response.find(b"+CSQ") >= 0:
@@ -162,15 +156,21 @@ class RockBlock(object):
 
                 self.conn.write(encoded_message)
 
-                self.conn.write(chr(checksum >> 8).encode())
-                self.conn.write(chr(checksum & 0xFF).encode())
+                self.conn.write(bytearray((checksum >> 8, checksum & 0xFF)))
+                # self.conn.write(bytearray(checksum & 0xFF))
 
                 self.conn.readline().strip()
 
                 result = False
 
-                if self.conn.readline().strip() == b'0':
+                response = self.conn.readline().strip()
+
+                if response == b'0':
                     result = True
+                else:
+                    print(response)
+                    print(encoded_message)
+                    print(checksum)
 
                 self.conn.readline()  # Blank
                 self.conn.readline()  # OK
@@ -205,7 +205,17 @@ class RockBlock(object):
                 if moStatus <= 4:
 
                     # Clear buffer
+                    self._clear_mo_buffer()
 
                     return True
 
         return False
+
+    @connected
+    def _clear_mo_buffer(self):
+        command = "AT+SBDD0"
+        self._command(command)
+        self.conn.readline()  # Command
+        self.conn.readline()  # 0
+        self.conn.readline()  # Blank
+        self.conn.readline()  # OK

@@ -23,6 +23,7 @@ if __name__ == '__main__':
     _queue = queue.Queue()
 
     clock_conn = serial.Serial("/dev/ttyUSB0", 9600, timeout=2)
+    print("Clock connection acquired on /dev/ttyUSB0")
     rb = RockBlock("/dev/ttyAMA0")
 
     transmitter = Transmitter(rb, _queue)

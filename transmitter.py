@@ -39,16 +39,20 @@ class Transmitter(threading.Thread):
 
                 if not result:
                     print("Transmission error, backing off.")
+                    self.transmit_buffer = temp + self.transmit_buffer
                     time.sleep(30)
+                    return
+
             except RockBlockSignalException:
                 print("Low signal, backing off.")
                 self.transmit_buffer = temp + self.transmit_buffer
                 time.sleep(30)
                 return
-#            except RockBlockException:
-#                print("Transmission error")
-#                self.transmit_buffer = temp + self.transmit_buffer
-#                return
+            except RockBlockException:
+                print("Transmission error")
+                self.transmit_buffer = temp + self.transmit_buffer
+                time.sleep(30)
+                return
 
         self._transmit.clear()
 
@@ -70,7 +74,7 @@ class Transmitter(threading.Thread):
                 if (delta > 30) or (len(self.transmit_buffer) > 1):
                     self._transmit.set()
 
-            if self._transmit.is_set():
+            if self._transmit.is_set() and self.work_queue.empty():
                 self.transmit()
 
             if self.stopped():

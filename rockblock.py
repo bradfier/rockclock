@@ -20,6 +20,7 @@
 
 import serial
 import time
+import traceback
 
 
 # Wrapper to quickly test the connection hasn't gone away
@@ -49,24 +50,20 @@ class RockBlock(object):
         try:
             self.conn = serial.Serial(self.handle, 19200, timeout=self.timeout)
 
-            # Allow 60s for initial startup
-            # self.conn.timeout = 60
-            self.ping()
+            if self.ping():
+                print("Rockblock connection acquired on {}".format(self.handle))
+            else:
+                raise RockBlockException("Failed initial startup")
 
-            if not self.ping():
-                self.conn.close()
-                raise RockBlockException()
-
-            self.conn.timeout = self.timeout
-
-        except (Exception):
-            raise RockBlockException()
+        except (RockBlockException):
+            traceback.print_exc()
+            raise
 
     @connected
     def ping(self):
         self._command("AT")
 
-        if self.conn.readline().strip() == b'AT':
+        if self.conn.readline().strip(b'\x00').strip() == b'AT':
             if self.conn.readline().strip() == b'OK':
                 return True
 
@@ -209,6 +206,7 @@ class RockBlock(object):
 
                     return True
 
+        self._clear_mo_buffer()
         return False
 
     @connected

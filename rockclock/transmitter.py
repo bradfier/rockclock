@@ -1,6 +1,6 @@
 import threading
 import time
-from rockblock import RockBlockSignalException, RockBlockException
+from .rockblock import RockBlockSignalException, RockBlockException
 from queue import Empty
 
 

@@ -2,9 +2,9 @@
 
 import signal
 import queue
-from transmitter import Transmitter
-from receiver import Receiver
-from rockblock import RockBlock
+from .transmitter import Transmitter
+from .receiver import Receiver
+from .rockblock import RockBlock
 
 import serial
 
@@ -15,10 +15,12 @@ receiver = None
 
 
 def term_handler(signum, frame):
+    global transmitter
     transmitter.stop()
 
 
-if __name__ == '__main__':
+def main():
+    global transmitter
 
     _queue = queue.Queue()
 

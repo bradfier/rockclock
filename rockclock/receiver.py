@@ -1,6 +1,4 @@
 import threading
-# Some serial library will need to be loaded
-
 
 class Receiver(threading.Thread):
 

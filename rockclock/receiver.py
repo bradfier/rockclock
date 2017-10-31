@@ -11,6 +11,7 @@ class Receiver(threading.Thread):
         self.work_queue = work_queue
         self._halt = threading.Event()
         self.conn = connection
+        self.counter = 0
 
     def run(self):
         while True:
@@ -22,8 +23,18 @@ class Receiver(threading.Thread):
             if item_from_serial:
                 self.work_queue.put(item_from_serial.decode())
 
+                self.counter= self.counter + 1
+                print("Received Data\n")
+                print("No of times received = ", self.counter)
+
+
             if self.stopped():
                 return
+
+    def getLength(self):
+        print("No of times received in the RX Calling Thread", self.counter)
+        return self.counter
+
 
     def stop(self):
         self._halt.set()

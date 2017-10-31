@@ -25,7 +25,7 @@ lcd = LCD(lcd_rs, lcd_en, lcd_d4, lcd_d5, lcd_d6, lcd_d7,
 
 class Display(threading.Thread):
 
-    def __init__(self, counter):
+    def __init__(self, receiver):
         """
         Display Code.
         """
@@ -34,9 +34,8 @@ class Display(threading.Thread):
         self._halt = threading.Event()
 #        self.test = Receiver
 #        self.conn = connection
-        self.counter = counter
+        self.receiver = receiver
 
-        times = self.counter
         lcd.home()
         lcd.message('    RockClock\n  Version 1.00')
 
@@ -46,7 +45,7 @@ class Display(threading.Thread):
             """
             Code to process status and display on screen
             """
- #           times2 = Receiver.getLength()
+            times_transmitted = self.receiver.getLength()
  #           print (" Display Thread run ", self.counter)
 
 

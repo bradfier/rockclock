@@ -63,8 +63,7 @@ def main():
     receiver.start()
     transmitter.start()
 
-    countervalue = receiver.getLength()
-    display = Display(countervalue )
+    display = Display(receiver)
 
     display.start()
 
